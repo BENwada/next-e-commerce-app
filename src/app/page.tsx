@@ -1,9 +1,11 @@
-import Image from "next/image";
+import Slider from "@/components/Slider";
 
-export default function Home() {
+const HomePage = () => {
   return (
-    <main className="">
-      <h1 className="">Home</h1>
-    </main>
+    <div>
+      <Slider />
+    </div>
   );
-}
+};
+
+export default HomePage;
