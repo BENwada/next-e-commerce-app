@@ -1,5 +1,6 @@
 import { wixClientServer } from "@/lib/wixClientServer";
 import { products } from "@wix/stores";
+import DOMPurify from "isomorphic-dompurify";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -19,6 +20,7 @@ const ProductList = async ({
     .limit(limit || PRODUCT_PER_PAGE)
     .find();
 
+  console.log(res.items[0]);
   return (
     <div className="mt-12 flex gap-x-8 gap-y-16 justify-between flex-wrap">
       {res.items.map((product: products.Product) => (
@@ -29,25 +31,38 @@ const ProductList = async ({
         >
           <div className="relative w-full h-80">
             <Image
-              src="https://images.pexels.com/photos/18738811/pexels-photo-18738811.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load"
+              src={product.media?.mainMedia?.image?.url || "/product.png"}
               alt="product"
               fill
               sizes="25vw"
               className="absolute object-cover rounded-md z-10 hover:opacity-0 transition-opacity ease-in duration-500"
             />
-            <Image
-              src="https://images.pexels.com/photos/984619/pexels-photo-984619.jpeg?auto=compress&cs=tinysrgb&w=600"
-              alt="product"
-              fill
-              sizes="25vw"
-              className="absolute object-cover rounded-md"
-            />
+            {product.media?.items && (
+              <Image
+                src={product.media?.items[1]?.image?.url || "/product.png"}
+                alt="product"
+                fill
+                sizes="25vw"
+                className="absolute object-cover rounded-md"
+              />
+            )}
           </div>
           <div className="flex justify-between">
             <span className="font-medium">{product.name}</span>
-            <span className="font-semibold">${product.price?.price}</span>
+            <span className="font-semibold">¥{product.price?.price}</span>
           </div>
-          <div className="text-sm text-gray-500">My description</div>
+          {product.additionalInfoSections && (
+            <div
+              className="text-sm text-gray-500"
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(
+                  product.additionalInfoSections?.find(
+                    (section: any) => section.title === "商品情報"
+                  )?.description || ""
+                ),
+              }}
+            />
+          )}
           <button className="rounded-2xl ring-1 ring-default w-max py-2 px-4 text-xs hover:bg-default hover:text-white">
             Add to cart
           </button>
